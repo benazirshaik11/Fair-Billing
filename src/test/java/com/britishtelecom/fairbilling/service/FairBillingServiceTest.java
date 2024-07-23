@@ -25,12 +25,8 @@ public class FairBillingServiceTest {
 
     private final FairBillingService service=new FairBillingService();
 
-    Map<String, Stack<Long>> sessions = new HashMap<>();
-    Map<String, Integer> totalUserSessions = new HashMap<>();
-    Map<String, Long> totalDuration = new HashMap<>();
 
-
-    private final String logDirectory = "testLogs";
+    private final String logDirectory = "src/test/resources/testLogs";
 
     @BeforeEach
     public void setUp() throws IOException {
@@ -50,6 +46,10 @@ public class FairBillingServiceTest {
         );
         Files.write(Paths.get(filePath), lines);
 
+        Map<String, Stack<Long>> sessions = new HashMap<>();
+        Map<String, Integer> totalUserSessions = new HashMap<>();
+        Map<String, Long> totalDuration = new HashMap<>();
+
         service.processLogFile(filePath,sessions,totalUserSessions,totalDuration);
 
         assertEquals(1,totalUserSessions.get("user1"));
@@ -68,6 +68,10 @@ public class FairBillingServiceTest {
 
         Files.write(Paths.get(filePath),lines);
 
+        Map<String, Stack<Long>> sessions = new HashMap<>();
+        Map<String, Integer> totalUserSessions = new HashMap<>();
+        Map<String, Long> totalDuration = new HashMap<>();
+
         service.processLogFile(filePath,sessions,totalUserSessions,totalDuration);
         assertEquals(2,totalUserSessions.get("user1"));
         assertEquals(22L, totalDuration.get("user1"));
@@ -85,6 +89,10 @@ public class FairBillingServiceTest {
         );
 
         Files.write(Paths.get(filePath),lines);
+
+        Map<String, Stack<Long>> sessions = new HashMap<>();
+        Map<String, Integer> totalUserSessions = new HashMap<>();
+        Map<String, Long> totalDuration = new HashMap<>();
 
         service.processLogFile(filePath,sessions,totalUserSessions,totalDuration);
 
@@ -106,6 +114,10 @@ public class FairBillingServiceTest {
 
         Files.write(Paths.get(filePath),lines);
 
+        Map<String, Stack<Long>> sessions = new HashMap<>();
+        Map<String, Integer> totalUserSessions = new HashMap<>();
+        Map<String, Long> totalDuration = new HashMap<>();
+
         service.processLogFile(filePath,sessions,totalUserSessions,totalDuration);
 
         assertEquals(2,totalUserSessions.get("user1"));
@@ -123,6 +135,10 @@ public class FairBillingServiceTest {
         );
 
         Files.write(Paths.get(filePath),lines);
+
+        Map<String, Stack<Long>> sessions = new HashMap<>();
+        Map<String, Integer> totalUserSessions = new HashMap<>();
+        Map<String, Long> totalDuration = new HashMap<>();
 
         service.processLogFile(filePath,sessions,totalUserSessions,totalDuration);
 
@@ -142,6 +158,10 @@ public class FairBillingServiceTest {
 
         Files.write(Paths.get(filePath),lines);
 
+        Map<String, Stack<Long>> sessions = new HashMap<>();
+        Map<String, Integer> totalUserSessions = new HashMap<>();
+        Map<String, Long> totalDuration = new HashMap<>();
+
         service.processLogFile(filePath,sessions,totalUserSessions,totalDuration);
 
         assertEquals(2,totalUserSessions.get("user1"));
@@ -153,6 +173,10 @@ public class FairBillingServiceTest {
         String filePath= logDirectory+ "/EmptyLogFile.log";
         List<String> lines=Collections.emptyList();
         Files.write(Paths.get(filePath),lines);
+
+        Map<String, Stack<Long>> sessions = new HashMap<>();
+        Map<String, Integer> totalUserSessions = new HashMap<>();
+        Map<String, Long> totalDuration = new HashMap<>();
 
         service.processLogFile(filePath,sessions,totalUserSessions,totalDuration);
 
