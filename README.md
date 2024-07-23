@@ -6,6 +6,7 @@ FairBilling is a Java-based utility designed to process log files and calculate 
 
 - [Getting Started](#getting-started)
 - [Usage](#usage)
+- [Features](#features)
 - [Testing](#testing)
 - [Error Handling](#error-handling)
 
@@ -20,43 +21,35 @@ FairBilling is a Java-based utility designed to process log files and calculate 
 
 ### Installation
 
-1. ***Clone the repository:***
+To install and run this project, follow these steps:
 
-   ```bash
-   git clone https://github.com/benazirshaik11/Fair-Billing.git
-   cd Fair-Billing
+1. ***Clone the repository***
+    ```bash
+    git clone https://github.com/yourusername/fair-billing.git
+    cd fair-billing
+    ```
 
-2. ***Compile the project:***
+2. ***Build the project***
+    ```bash
+    mvn clean install
+    ```
 
-If you are using Maven, you can compile the project with:
+3. ***Run the application***
+    ```bash
+    java -jar target/fair-billing-1.0-SNAPSHOT.jar <path-to-log-file>
+    ```
 
-```bash
-mvn clean install
-```
-
-Alternatively, you can compile the project manually:
-
-```bash
-javac -d target/classes src/main/java/fairbilling/service/FairBillingApp.java
-```
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ## Usage
-
-To run the program, you need to provide the path to the log file as a command-line argument.
-
-***Command Line***
+To use the Fair Billing application, provide the path to the log file as an argument. For example:
 
 ```bash
-java -cp target/classes fairbilling.service.FairBillingApp path/to/logfile.log
+java -jar target/fair-billing-1.0-SNAPSHOT.jar ./fair-billing/session_log.txt
 ```
 
-***Example***
-
-```bash
-java -cp target/classes fairbilling.service.FairBillingApp ./fair-billing/session_log.txt
-```
+If no arguments are passed, the application will generate an error indicating that the log file path is required.
 
 ***Log File Format***
 
@@ -78,6 +71,40 @@ The log file should have entries in the following format:
 ```
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Features
+
+- Calculate the total sessions and duration of each user's sessions.
+- Generate detailed user session reports.
+- Handle overlapping and multiple sessions.
+- Flexible and easy-to-use configuration.
+
+
+***Main Class: FairBillingApp:***
+
+The FairBillingApp class is the entry point of the application. It handles the command-line arguments, initializes the necessary data structures, and invokes the service class to process the log file.
+
+**Key Responsibilities**
+- Parse command-line arguments to get the log file path.
+- Initialize data structures to store session data.
+- Call the FairBillingService to process the log file and generate reports.
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+***Service Class: FairBillingService:***
+
+The FairBillingService class contains the core logic for processing the log file, calculating session durations, and handling various session scenarios.
+
+**Key Methods**
+- processLogFile: Reads the log file and processes each line to calculate session durations.
+- handleStartAction: Handles the "Start" action by recording the start time of a session.
+- handleEndAction: Handles the "End" action by calculating the duration of a session.
+- calculateRemainingSessions: Calculates the duration for any sessions that did not have an end time.
+- printUserSessions: Prints the session data for each user.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 
 ## Testing
 
@@ -121,12 +148,10 @@ mvn test
 
 ## Error Handling
 
-```
 - If the log file path is not provided, the program will throw an IllegalArgumentException.
 - If the log file is not found, a FileNotFoundException will be thrown.
 - If there are errors reading the file, an IOException will be thrown.
 - If there are errors parsing the time, a ParseException will be thrown.
-```
 
 
 
