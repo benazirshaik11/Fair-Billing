@@ -28,16 +28,41 @@ To install and run this project, follow these steps:
     git clone https://github.com/yourusername/fair-billing.git
     cd fair-billing
     ```
+### without Maven
+Please set JAVA_HOME environment variable
+example:
+```bash
+set JAVA_HOME="path_to_jdks\1.8.xxx";
+set PATH=%JAVA_HOME%\bin;%PATH%
+```
+Please create a target/classes directory
+example:
+```bash
+mkdir target\classes
+```
+compile java files into target/classes
+```bash
+javac -d target/classes src/main/java/com/britishtelecom/fairbilling/models/*.java src/main/java/com/britishtelecom/fairbilling/service/*.java src/main/java/com/britishtelecom/fairbilling/*.java
+```
+cd into target/classes
+```bash
+cd target/classes
+```
+Run main class with file path as 1st argument
+```bash
+java com.britishtelecom.fairbilling.FairBillingApp path_to_file/session_log.txt
+```
+### Using Maven
 
-2. ***Build the project***
-    ```bash
-    mvn clean install
-    ```
+1.***Build the project***
+```bash
+mvn clean install
+```
 
-3. ***Run the application***
-    ```bash
-    java -jar target/fair-billing-1.0-SNAPSHOT.jar <path-to-log-file>
-    ```
+2.***Run the application***
+```bash
+java -jar target/fair-billing-1.0-SNAPSHOT.jar <path-to-log-file>
+```
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -46,7 +71,7 @@ To install and run this project, follow these steps:
 To use the Fair Billing application, provide the path to the log file as an argument. For example:
 
 ```bash
-java -jar target/fair-billing-1.0-SNAPSHOT.jar ./fair-billing/session_log.txt
+java -jar target/fair-billing-1.0-SNAPSHOT.jar <path-to-log-file>
 ```
 
 If no arguments are passed, the application will generate an error indicating that the log file path is required.
@@ -86,8 +111,8 @@ The FairBillingApp class is the entry point of the application. It handles the c
 
 **Key Responsibilities**
 - Parse command-line arguments to get the log file path.
-- Initialize data structures to store session data.
 - Call the FairBillingService to process the log file and generate reports.
+- Call the FairBillingService to print reports.
 
 ----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -108,32 +133,7 @@ The FairBillingService class contains the core logic for processing the log file
 
 ## Testing
 
-Test cases for the FairBilling service can be found in the src/test/java/fairbilling/service directory. Here are some examples:
-
-***Basic Functionality Test***
-```Java
-import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.Test;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
-
-public class FairBillingServiceTest {
-    @Test
-    public void testBasicFunctionality() {
-        String filePath = "testLogs/BasicFunctionality.log";
-        Map<String, Stack<Long>> sessions = new HashMap<>();
-        Map<String, Integer> totalUserSessions = new HashMap<>();
-        Map<String, Long> totalDuration = new HashMap<>();
-
-        FairBillingService service = new FairBillingService();
-        service.processLogFile(filePath, sessions, totalUserSessions, totalDuration);
-
-        assertEquals(1,totalUserSessions.get("user1"));
-        assertEquals(12L, totalDuration.get("user1"));
-    }
-}
-```
+Test cases for the FairBilling service can be found in the src/test/java/com/britishtelecom/fairbilling/ directory.
 For complete test cases, refer to the FairBillingServiceTest class in the test directory.
 
 ***Running Tests***
@@ -148,7 +148,7 @@ mvn test
 
 ## Error Handling
 
-- If the log file path is not provided, the program will throw an IllegalArgumentException.
+- If the log file path is not provided, the program will exit with status 1 with message "File path must be provided as an argument.".
 - If the log file is not found, a FileNotFoundException will be thrown.
 - If there are errors reading the file, an IOException will be thrown.
 - If there are errors parsing the time, a ParseException will be thrown.

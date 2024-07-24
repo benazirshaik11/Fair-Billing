@@ -1,186 +1,110 @@
 package com.britishtelecom.fairbilling.service;
 
-import org.junit.jupiter.api.BeforeEach;
+import com.britishtelecom.fairbilling.models.SessionsLog;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.ParseException;
-import java.util.Arrays;
-import java.util.Collections;
+import java.io.PrintStream;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 public class FairBillingServiceTest {
 
     private File testFile;
 
-    private final FairBillingService service=new FairBillingService();
+    private final FairBillingService service = new FairBillingService();
 
+    private static final String LOG_DIRECTORY = "src/test/resources/testLogs";
 
-    private final String logDirectory = "src/test/resources/testLogs";
+    @Test
+    public void testNormalSessionsWithMultipleUsers() {
+        String filePath = LOG_DIRECTORY + "/NormalSessionsWithMultipleUsers.log";
 
-    @BeforeEach
-    public void setUp() throws IOException {
-        // Create the directory if it does not exist
-        Path path = Paths.get(logDirectory);
-        if (!Files.exists(path)) {
-            Files.createDirectory(path);
+        SessionsLog sessionsLog = service.processLogFile(filePath);
+
+        assertEquals(3, sessionsLog.getTotalUserSessions().get("user1"));
+        assertEquals(71L, sessionsLog.getTotalDuration().get("user1"));
+        assertEquals(2, sessionsLog.getTotalUserSessions().get("user2"));
+        assertEquals(19L, sessionsLog.getTotalDuration().get("user2"));
+    }
+
+    @Test
+    public void testWithOverlappingSessions() {
+        String filePath = LOG_DIRECTORY + "/OverlappingSessions.log";
+        SessionsLog sessionsLog = service.processLogFile(filePath);
+        assertEquals(2, sessionsLog.getTotalUserSessions().get("user1"));
+        assertEquals(88L, sessionsLog.getTotalDuration().get("user1"));
+
+    }
+
+    @Test
+    public void testNoEndOrEndSession() {
+        String filePath = LOG_DIRECTORY + "/NoEndOrEndSession.log";
+        SessionsLog sessionsLog = service.processLogFile(filePath);
+        assertEquals(2, sessionsLog.getTotalUserSessions().get("user1"));
+        assertEquals(106L, sessionsLog.getTotalDuration().get("user1"));
+        assertEquals(2, sessionsLog.getTotalUserSessions().get("user2"));
+        assertEquals(136L, sessionsLog.getTotalDuration().get("user2"));
+
+    }
+
+    @Test
+    public void testWithEmptyLogFile() {
+        String filePath = LOG_DIRECTORY + "/EmptyLogFile.log";
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> service.processLogFile(filePath));
+        assertEquals("No valid entries found in the log file", exception.getMessage());
+    }
+
+    @Test
+    public void testWithInvalidEntries() {
+        String filePath = LOG_DIRECTORY + "/InvalidEntries.log";
+        SessionsLog sessionsLog = service.processLogFile(filePath);
+        assertEquals(3, sessionsLog.getTotalUserSessions().size());
+        assertEquals(3, sessionsLog.getTotalDuration().size());
+        assertEquals(45L,sessionsLog.getTotalDuration().get("User") );
+    }
+
+    @Test
+    public void testProcessLogFile_NonExistentFile() {
+        String filePath = "path/to/nonexistent/logfile.txt";
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> service.processLogFile(filePath));
+        assertEquals("java.io.FileNotFoundException: path\\to\\nonexistent\\logfile.txt (The system cannot find the path specified)", exception.getMessage());
+    }
+
+    @Test
+    void testPrintMessage() {
+        // Create a ByteArrayOutputStream to capture the output of System.out
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        PrintStream originalOut = System.out;
+
+        try {
+            // Redirect System.out to the ByteArrayOutputStream
+            System.setOut(new PrintStream(outputStream));
+
+            // Call the method that prints the message
+            service.printUserSessions(new SessionsLog(
+                    new HashMap<String, Long>() {
+                        {
+                            put("user1", 1L);
+                            put("user2", 2L);
+                        }
+                    },
+                    new HashMap<String, Integer>() {{
+                        put("user1", 3);
+                        put("user2", 4);
+                    }}
+            ));
+
+            // Assert that the expected message is printed
+            assertEquals("user1 3 1\r\nuser2 4 2\r\n", outputStream.toString());
+        } finally {
+            // Restore the original System.out
+            System.setOut(originalOut);
         }
-    }
 
-    @Test
-    public void testBasicFunctionality() throws IOException, ParseException{
-        String filePath = logDirectory+ "/BasicFunctionality.log";
-        List<String> lines = Arrays.asList(
-                "00:05:00 user1 Start",
-                "00:05:12 user1 End"
-        );
-        Files.write(Paths.get(filePath), lines);
-
-        Map<String, Stack<Long>> sessions = new HashMap<>();
-        Map<String, Integer> totalUserSessions = new HashMap<>();
-        Map<String, Long> totalDuration = new HashMap<>();
-
-        service.processLogFile(filePath,sessions,totalUserSessions,totalDuration);
-
-        assertEquals(1,totalUserSessions.get("user1"));
-        assertEquals(12L, totalDuration.get("user1"));
-    }
-    @Test
-    public void testMultipleSessionsforOneUser() throws IOException, ParseException {
-        String filePath=logDirectory+ "/MultipleSessionsforOneUser.log";
-
-        List<String> lines= Arrays.asList(
-                "00:05:00 user1 Start",
-                "00:05:12 user1 End",
-                "00:05:15 user1 Start",
-                "00:05:25 user1 End"
-        );
-
-        Files.write(Paths.get(filePath),lines);
-
-        Map<String, Stack<Long>> sessions = new HashMap<>();
-        Map<String, Integer> totalUserSessions = new HashMap<>();
-        Map<String, Long> totalDuration = new HashMap<>();
-
-        service.processLogFile(filePath,sessions,totalUserSessions,totalDuration);
-        assertEquals(2,totalUserSessions.get("user1"));
-        assertEquals(22L, totalDuration.get("user1"));
-
-    }
-
-    @Test
-    public void testMultipleUsersSessions() throws IOException, ParseException{
-        String filePath= logDirectory+ "/MultipleUsersSessions.log";
-        List<String> lines= Arrays.asList(
-                "00:05:00 user1 Start",
-                "00:05:12 user1 End",
-                "00:05:15 user2 Start",
-                "00:05:25 user2 End"
-        );
-
-        Files.write(Paths.get(filePath),lines);
-
-        Map<String, Stack<Long>> sessions = new HashMap<>();
-        Map<String, Integer> totalUserSessions = new HashMap<>();
-        Map<String, Long> totalDuration = new HashMap<>();
-
-        service.processLogFile(filePath,sessions,totalUserSessions,totalDuration);
-
-        assertEquals(1,totalUserSessions.get("user1"));
-        assertEquals(12L, totalDuration.get("user1"));
-        assertEquals(1,totalUserSessions.get("user2"));
-        assertEquals(10L, totalDuration.get("user2"));
-
-    }
-    @Test
-    public void testWithOverlappingSessions() throws IOException, ParseException{
-        String filePath= logDirectory+ "/OverlappingSessions.log";
-        List<String> lines= Arrays.asList(
-                "00:05:00 user1 Start",
-                "00:05:12 user1 Start",
-                "00:05:15 user1 End",
-                "00:06:25 user1 End"
-        );
-
-        Files.write(Paths.get(filePath),lines);
-
-        Map<String, Stack<Long>> sessions = new HashMap<>();
-        Map<String, Integer> totalUserSessions = new HashMap<>();
-        Map<String, Long> totalDuration = new HashMap<>();
-
-        service.processLogFile(filePath,sessions,totalUserSessions,totalDuration);
-
-        assertEquals(2,totalUserSessions.get("user1"));
-        assertEquals(88L, totalDuration.get("user1"));
-
-    }
-
-    @Test
-    public void testWithNoEndSessions() throws IOException, ParseException{
-        String filePath= logDirectory+ "/NoEndSession.log";
-        List<String> lines= Arrays.asList(
-                "00:05:00 user1 Start",
-                "00:05:12 user1 Start",
-                "00:05:15 user1 End"
-        );
-
-        Files.write(Paths.get(filePath),lines);
-
-        Map<String, Stack<Long>> sessions = new HashMap<>();
-        Map<String, Integer> totalUserSessions = new HashMap<>();
-        Map<String, Long> totalDuration = new HashMap<>();
-
-        service.processLogFile(filePath,sessions,totalUserSessions,totalDuration);
-
-        assertEquals(2,totalUserSessions.get("user1"));
-        assertEquals(18L, totalDuration.get("user1"));
-
-    }
-
-    @Test
-    public void testWithNoStartSessions() throws IOException, ParseException{
-        String filePath= logDirectory+ "/NoStartSession.log";
-        List<String> lines= Arrays.asList(
-                "00:05:12 user1 Start",
-                "00:05:15 user1 End",
-                "00:05:43 user1 End"
-        );
-
-        Files.write(Paths.get(filePath),lines);
-
-        Map<String, Stack<Long>> sessions = new HashMap<>();
-        Map<String, Integer> totalUserSessions = new HashMap<>();
-        Map<String, Long> totalDuration = new HashMap<>();
-
-        service.processLogFile(filePath,sessions,totalUserSessions,totalDuration);
-
-        assertEquals(2,totalUserSessions.get("user1"));
-        assertEquals(34L, totalDuration.get("user1"));
-    }
-
-    @Test
-    public void testWithEmptyLogFile() throws IOException, ParseException{
-        String filePath= logDirectory+ "/EmptyLogFile.log";
-        List<String> lines=Collections.emptyList();
-        Files.write(Paths.get(filePath),lines);
-
-        Map<String, Stack<Long>> sessions = new HashMap<>();
-        Map<String, Integer> totalUserSessions = new HashMap<>();
-        Map<String, Long> totalDuration = new HashMap<>();
-
-        service.processLogFile(filePath,sessions,totalUserSessions,totalDuration);
-
-        assertEquals(0,totalUserSessions.size());
-        assertEquals(0, totalDuration.size());
     }
 }
