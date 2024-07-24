@@ -33,7 +33,7 @@ Please set JAVA_HOME environment variable
 example:
 ```bash
 set JAVA_HOME="path_to_jdks\1.8.xxx";
-set PATH=%JAVA_HOME%\bin;%PATH%
+set PATH="%JAVA_HOME%\bin;%PATH%"
 ```
 Please create a target/classes directory
 example:
