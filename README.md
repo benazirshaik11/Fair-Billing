@@ -25,8 +25,8 @@ To install and run this project, follow these steps:
 
 1. ***Clone the repository***
     ```bash
-    git clone https://github.com/yourusername/fair-billing.git
-    cd fair-billing
+    git clone git clone https://github.com/benazirshaik11/Fair-Billing.git
+    cd Fair-Billing
     ```
 ### without Maven
 Please set JAVA_HOME environment variable
