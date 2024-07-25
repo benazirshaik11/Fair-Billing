@@ -24,10 +24,11 @@ FairBilling is a Java-based utility designed to process log files and calculate 
 To install and run this project, follow these steps:
 
 ***Clone the repository***
-    ```bash
-    git clone git clone https://github.com/benazirshaik11/Fair-Billing.git
-    cd Fair-Billing
-    ```
+
+```bash
+git clone git clone https://github.com/benazirshaik11/Fair-Billing.git
+cd Fair-Billing
+```
 ### Without Maven
 Please set JAVA_HOME environment variable
 example:
