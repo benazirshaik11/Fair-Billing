@@ -23,17 +23,17 @@ FairBilling is a Java-based utility designed to process log files and calculate 
 
 To install and run this project, follow these steps:
 
-1. ***Clone the repository***
+***Clone the repository***
     ```bash
     git clone git clone https://github.com/benazirshaik11/Fair-Billing.git
     cd Fair-Billing
     ```
-### without Maven
+### Without Maven
 Please set JAVA_HOME environment variable
 example:
 ```bash
 set JAVA_HOME="path_to_jdks\1.8.xxx";
-set PATH="%JAVA_HOME%\bin;%PATH%"
+set PATH=%JAVA_HOME%\bin;%PATH%
 ```
 Please create a target/classes directory
 example:
@@ -53,6 +53,7 @@ Run main class with file path as 1st argument
 java com.britishtelecom.fairbilling.FairBillingApp path_to_file/session_log.txt
 ```
 ### Using Maven
+Please set MAVEN_HOME, JAVA_HOME and append it to PATH
 
 1.***Build the project***
 ```bash
